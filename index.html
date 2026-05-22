@@ -553,7 +553,7 @@ function checkUrl(){
 }
 loadData();
 renderGrid();
-checkUrl();
+setTimeout(function(){ checkUrl(); }, 500);
 setTimeout(function(){ trophies.forEach(function(t){ initMini(t.id); }); }, 200);
 </script>
 </body>
