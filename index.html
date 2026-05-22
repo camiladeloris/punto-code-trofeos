@@ -548,7 +548,7 @@ function checkUrl(){
     document.getElementById('tv-share').style.display = 'none';
     var t = {id:p.get('id'),name:p.get('n'),group:p.get('g')||'Roblox Studio',achievement:p.get('a')||'Graduación',color:p.get('c')||'gold'};
     if(!trophies.find(function(x){ return x.id===t.id; })){ trophies.push(t); saveData(); }
-    setTimeout(function(){ openView(t.id); }, 350);
+    setTimeout(function(){ openView(t.id); }, 800);
   }
 }
 loadData();
