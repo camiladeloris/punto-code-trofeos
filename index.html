@@ -544,8 +544,10 @@ function showToast(msg){
 function checkUrl(){
   var p = new URLSearchParams(location.search);
   if(p.get('id') && p.get('n')){
-    document.getElementById('tv-back').style.display = 'none';
-    document.getElementById('tv-share').style.display = 'none';
+    var back = document.getElementById('tv-back');
+    var share = document.getElementById('tv-share');
+    if(back) back.style.display = 'none';
+    if(share) share.style.display = 'none';
     var t = {id:p.get('id'),name:p.get('n'),group:p.get('g')||'Roblox Studio',achievement:p.get('a')||'Graduación',color:p.get('c')||'gold'};
     if(!trophies.find(function(x){ return x.id===t.id; })){ trophies.push(t); saveData(); }
     openView(t.id);
