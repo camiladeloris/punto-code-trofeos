@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto Code · Trofeos de Graduación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:'DM Mono',monospace;color:#fff;min-height:100vh}
+#app{min-height:100vh;background:#000}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-mark{display:flex;align-items:center;gap:3px}
+.logo-mark span{display:block;border-radius:50%}
+.logo-mark .d1{width:10px;height:10px;background:#00ba12}
+.logo-mark .d2{width:10px;height:10px;background:#ff4240}
+.logo-mark .d3{width:10px;height:10px;background:#ff9f00}
+.logo-text-wrap{display:flex;flex-direction:column;gap:1px}
+.logo-text{font-size:17px;font-weight:500;color:#fff;letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:#444;letter-spacing:1px}
+.admin-view{padding:24px;max-width:960px;margin:0 auto}
+.section-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px}
+.add-form{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:14px;padding:20px;margin-bottom:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;color:#555;letter-spacing:.5px}
+.fg input,.fg select{background:#000;border:1px solid #282828;border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:'DM Mono',monospace;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:#00ba12}
+.fg select option{background:#111}
+.btn-primary{background:#00ba12;border:none;color:#000;font-size:12px;font-weight:500;padding:10px 22px;border-radius:8px;cursor:pointer;font-family:'DM Mono',monospace;transition:opacity .2s;letter-spacing:.3px}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{background:transparent;border:1px solid #282828;color:#888;font-size:11px;padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s}
+.btn-secondary:hover{border-color:#555;color:#ccc}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.trophies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px}
+.trophy-card{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:12px;overflow:hidden;transition:border-color .2s,transform .15s;position:relative}
+.trophy-card:hover{border-color:#2a2a2a;transform:translateY(-2px)}
+.trophy-card.selected{border-color:#00ba12!important;box-shadow:0 0 0 1px #00ba12}
+.sel-badge{position:absolute;top:8px;right:8px;background:#00ba12;color:#000;font-size:9px;font-weight:500;padding:2px 7px;border-radius:20px;display:none;font-family:'DM Mono',monospace;z-index:2}
+.trophy-card.selected .sel-badge{display:block}
+.tc-canvas{width:100%;height:130px;display:block;background:#080808}
+.tc-info{padding:11px 12px}
+.tc-name{font-size:12px;font-weight:500;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-sub{font-size:10px;color:#555;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-actions{display:flex;gap:5px}
+.tc-btn{flex:1;background:transparent;border:1px solid #1c1c1c;color:#666;font-size:10px;padding:5px 4px;border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s;text-align:center}
+.tc-btn:hover{border-color:#444;color:#ccc}
+.empty{text-align:center;padding:50px 20px;color:#333;font-size:12px;line-height:2}
+
+/* TROPHY VIEW */
+.trophy-view{position:fixed;inset:0;background:#000;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.tv-back{position:absolute;top:18px;left:18px;z-index:10}
+.tv-share{position:absolute;top:18px;right:18px;z-index:10}
+.tv-canvas{display:block;position:relative;z-index:5}
+.tv-info{text-align:center;margin-top:12px;position:relative;z-index:5}
+.tv-label{font-size:9px;color:#00ba12;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+.tv-name{font-size:32px;font-weight:500;color:#fff;letter-spacing:-1px;margin-bottom:3px}
+.tv-course{font-size:12px;color:#555;margin-bottom:8px}
+.tv-badge{display:inline-block;border:1px solid #222;border-radius:20px;padding:4px 14px;font-size:10px;color:#555}
+.confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.pc-watermark{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;opacity:.25;z-index:5}
+.pc-watermark .dots{display:flex;gap:3px}
+.pc-watermark .dots span{display:block;width:7px;height:7px;border-radius:50%}
+.pc-watermark-text{font-size:11px;color:#fff;font-family:'DM Mono',monospace}
+
+/* GRADUATION VIEW */
+.grad-view{position:fixed;inset:0;background:#000;z-index:100;overflow:hidden}
+.grad-back{position:absolute;top:18px;left:18px;z-index:10}
+.grad-header{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.grad-header .hdots{display:flex;gap:3px}
+.grad-header .hdots span{display:block;width:7px;height:7px;border-radius:50%}
+.grad-header-text{font-size:11px;color:#fff;font-family:'DM Mono',monospace;letter-spacing:1px}
+.grad-grid{display:grid;width:100%;height:100%;padding:56px 20px 20px;gap:14px;align-items:center;justify-items:center}
+.grad-item{display:flex;flex-direction:column;align-items:center;gap:5px;animation:fadeInUp .6s ease both}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.grad-item canvas{display:block;border-radius:8px}
+.grad-name{font-size:10px;color:#fff;font-family:'DM Mono',monospace;text-align:center;font-weight:500}
+.grad-ach{font-size:8px;color:#444;font-family:'DM Mono',monospace;text-align:center}
+.grad-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.grad-logo{position:absolute;bottom:16px;right:16px;display:flex;align-items:center;gap:5px;opacity:.3}
+.grad-logo .gdots{display:flex;gap:2px}
+.grad-logo .gdots span{display:block;width:6px;height:6px;border-radius:50%}
+.grad-logo-text{font-size:10px;color:#fff;font-family:'DM Mono',monospace}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#111;border:1px solid #282828;border-radius:16px;padding:24px;width:380px;max-width:100%}
+.modal-title{font-size:14px;font-weight:500;margin-bottom:6px}
+.modal-sub{font-size:11px;color:#555;margin-bottom:16px;line-height:1.6}
+.link-box{background:#000;border:1px solid #222;border-radius:8px;padding:10px 12px;font-size:10px;color:#888;font-family:'DM Mono',monospace;word-break:break-all;margin-bottom:14px;line-height:1.7;user-select:all;cursor:text}
+.modal-btns{display:flex;gap:8px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#00ba12;color:#000;padding:9px 18px;border-radius:8px;font-size:11px;font-family:'DM Mono',monospace;font-weight:500;z-index:400;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ADMIN VIEW -->
+<div class="admin-view" id="admin-view">
+  <div class="logo">
+    <div class="logo-mark">
+      <span class="d1"></span><span class="d2"></span><span class="d3"></span>
+    </div>
+    <div class="logo-text-wrap">
+      <div class="logo-text">Punto Code</div>
+      <div class="logo-sub">TROFEOS · ROBLOX STUDIO</div>
+    </div>
+  </div>
+
+  <div class="add-form">
+    <div class="section-label">Nuevo trofeo</div>
+    <div class="form-row">
+      <div class="fg"><label>Nombre del alumno</label><input id="i-name" placeholder="ej. Sebastián López" /></div>
+      <div class="fg"><label>Generación / Grupo</label><input id="i-group" placeholder="ej. Gen. 2025-A" /></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Logro especial</label><input id="i-ach" placeholder="ej. Mejor juego del módulo" /></div>
+      <div class="fg"><label>Color del trofeo</label>
+        <select id="i-col">
+          <option value="gold">Dorado</option>
+          <option value="green">Verde neón</option>
+          <option value="red">Rojo fuego</option>
+          <option value="blue">Azul cielo</option>
+          <option value="pink">Rosa</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="addTrophy()">+ Generar trofeo</button>
+  </div>
+
+  <div class="top-bar">
+    <div class="section-label" style="margin:0">Trofeos generados</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="sel-count" style="font-size:10px;color:#555"></span>
+      <button class="btn-secondary" id="btn-grad" onclick="openGrad()" style="display:none">Ver graduación</button>
+    </div>
+  </div>
+  <div class="trophies-grid" id="grid"></div>
+  <div class="empty" id="empty">Aún no hay trofeos.<br>¡Agrega el primero arriba!</div>
+</div>
+
+<!-- TROPHY INDIVIDUAL VIEW -->
+<div class="trophy-view" id="trophy-view" style="display:none">
+  <div class="confetti-wrap" id="tv-confetti"></div>
+  <div class="tv-back"><button class="btn-secondary" onclick="closeView()">← Volver</button></div>
+  <div class="tv-share"><button class="btn-primary" onclick="showShare()">Compartir link</button></div>
+  <canvas class="tv-canvas" id="tv-canvas" width="340" height="340"></canvas>
+  <div class="tv-info">
+    <div class="tv-label">¡Felicidades, graduado!</div>
+    <div class="tv-name" id="tv-name"></div>
+    <div class="tv-course" id="tv-course"></div>
+    <div class="tv-badge" id="tv-badge"></div>
+  </div>
+  <div class="pc-watermark">
+    <div class="dots">
+      <span style="background:#00ba12"></span>
+      <span style="background:#ff4240"></span>
+      <span style="background:#ff9f00"></span>
+    </div>
+    <div class="pc-watermark-text">Punto Code</div>
+  </div>
+</div>
+
+<!-- GRADUATION VIEW -->
+<div class="grad-view" id="grad-view" style="display:none">
+  <div class="grad-confetti" id="gv-confetti"></div>
+  <div class="grad-back"><button class="btn-secondary" onclick="closeGrad()">← Volver</button></div>
+  <div class="grad-header">
+    <div class="hdots">
+      <span style="background:#00ba12"></span>
+      <span style="background:#ff4240"></span>
+      <span style="background:#ff9f00"></span>
+    </div>
+    <div class="grad-header-text">Graduación · Roblox Studio</div>
+  </div>
+  <div class="grad-grid" id="grad-grid"></div>
+  <div class="grad-logo">
+    <div class="gdots">
+      <span style="background:#00ba12"></span>
+      <span style="background:#ff4240"></span>
+      <span style="background:#ff9f00"></span>
+    </div>
+    <div class="grad-logo-text">Punto Code</div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="share-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Link del trofeo</div>
+    <div class="modal-sub">Comparte este link con el alumno para que vea su trofeo personalizado.</div>
+    <div class="link-box" id="share-link"></div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="copyLink()">Copiar link</button>
+      <button class="btn-secondary" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const COLS = {
+  gold:  {p:0xffb800,s:0xe08800,a:0xffe599,n:'Dorado'},
+  green: {p:0x00ba12,s:0x009910,a:0x77ffaa,n:'Verde neón'},
+  red:   {p:0xff4240,s:0xcc1f1e,a:0xff9988,n:'Rojo fuego'},
+  blue:  {p:0x00b4f0,s:0x0088cc,a:0x88ddff,n:'Azul cielo'},
+  pink:  {p:0xff77ac,s:0xcc4488,a:0xffbbdd,n:'Rosa'},
+};
+const PC_COLORS = ['#00ba12','#ff4240','#ff9f00','#ff77ac','#00b4f0','#ffffff'];
+
+let trophies = [], miniScenes = {}, selIds = new Set();
+let tvRenderer = null, tvAnimId = null, currentTrophy = null;
+let gradRenderers = [], gradAnimIds = [];
+
+function loadData(){ try{ const d=localStorage.getItem('pc_trophies_v2'); if(d) trophies=JSON.parse(d); }catch(e){} }
+function saveData(){ try{ localStorage.setItem('pc_trophies_v2',JSON.stringify(trophies)); }catch(e){} }
+function genId(){ return 't'+Date.now()+Math.random().toString(36).slice(2,6); }
+
+function mat(hex,r,m){
+  r = r===undefined ? 0.15 : r;
+  m = m===undefined ? 0.92 : m;
+  return new THREE.MeshStandardMaterial({color:hex,roughness:r,metalness:m});
+}
+
+function buildTrophy(scene, colKey, s){
+  s = s===undefined ? 1 : s;
+  const c = COLS[colKey] || COLS.gold;
+  const g = new THREE.Group();
+
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(.55*s,.38*s,.9*s,40), mat(c.p));
+  cup.position.y = .45*s; g.add(cup);
+
+  const rimTop = new THREE.Mesh(new THREE.TorusGeometry(.565*s,.048*s,16,52), mat(c.a,.06,1));
+  rimTop.position.y = .9*s; g.add(rimTop);
+
+  const rimBot = new THREE.Mesh(new THREE.TorusGeometry(.565*s,.048*s,16,52), mat(c.a,.06,1));
+  rimBot.position.y = 0; g.add(rimBot);
+
+  const hg = new THREE.TorusGeometry(.22*s,.046*s,12,24,Math.PI);
+  const hm = mat(c.s,.2,.85);
+  const h1 = new THREE.Mesh(hg,hm);
+  h1.rotation.set(0,Math.PI/2,Math.PI/2); h1.position.set(.73*s,.44*s,0); g.add(h1);
+  const h2 = new THREE.Mesh(hg,hm);
+  h2.rotation.set(0,-Math.PI/2,-Math.PI/2); h2.position.set(-.73*s,.44*s,0); g.add(h2);
+
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(.1*s,.14*s,.5*s,24), mat(c.s));
+  stem.position.y = -.25*s; g.add(stem);
+
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.52*s,.62*s,.18*s,32), mat(c.p,.2,.75));
+  base.position.y = -.59*s; g.add(base);
+
+  const sh = new THREE.Shape();
+  for(let i=0;i<10;i++){
+    const a=(i*Math.PI)/5-Math.PI/2, r=i%2?(.08*s):(.18*s);
+    sh[i?'lineTo':'moveTo'](Math.cos(a)*r, Math.sin(a)*r);
+  }
+  sh.closePath();
+  const star = new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:.04*s,bevelEnabled:false}), mat(c.a,.05,1));
+  star.position.set(0,.47*s,.57*s); g.add(star);
+
+  scene.add(new THREE.AmbientLight(0xffffff,.45));
+  const kl = new THREE.DirectionalLight(0xffffff,1.3); kl.position.set(2,4,3); scene.add(kl);
+  const fl = new THREE.DirectionalLight(c.a,.7); fl.position.set(-3,1,-2); scene.add(fl);
+  const rl = new THREE.DirectionalLight(0xffffff,.35); rl.position.set(0,-3,2); scene.add(rl);
+  scene.add(g);
+  return g;
+}
+
+function initMini(id){
+  const t = trophies.find(x=>x.id===id); if(!t) return;
+  const canvas = document.getElementById('mc-'+id); if(!canvas) return;
+  if(miniScenes[id]){ cancelAnimationFrame(miniScenes[id].raf); miniScenes[id].r.dispose(); }
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  r.setSize(190,130); r.setPixelRatio(Math.min(window.devicePixelRatio,2)); r.setClearColor(0,0);
+  const sc = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(40,190/130,.1,50);
+  cam.position.set(0,.3,3.2); cam.lookAt(0,.1,0);
+  const grp = buildTrophy(sc, t.color, .55);
+  miniScenes[id] = {r, raf:null};
+  const tick = function(){
+    const raf = requestAnimationFrame(tick);
+    grp.rotation.y += .018;
+    r.render(sc, cam);
+    miniScenes[id].raf = raf;
+  };
+  tick();
+}
+
+function addTrophy(){
+  const name = document.getElementById('i-name').value.trim();
+  if(!name){ showToast('Ingresa el nombre del alumno'); return; }
+  const t = {
+    id: genId(),
+    name: name,
+    group: document.getElementById('i-group').value.trim() || 'Roblox Studio',
+    achievement: document.getElementById('i-ach').value.trim() || 'Graduación',
+    color: document.getElementById('i-col').value
+  };
+  trophies.push(t); saveData(); renderGrid();
+  ['i-name','i-group','i-ach'].forEach(function(id){ document.getElementById(id).value=''; });
+  showToast('¡Trofeo creado!');
+  setTimeout(function(){ initMini(t.id); }, 150);
+}
+
+function deleteTrophy(id){
+  if(!confirm('¿Eliminar este trofeo?')) return;
+  selIds.delete(id);
+  if(miniScenes[id]){ cancelAnimationFrame(miniScenes[id].raf); miniScenes[id].r.dispose(); delete miniScenes[id]; }
+  trophies = trophies.filter(function(t){ return t.id!==id; });
+  saveData(); renderGrid(); updateSelUI();
+}
+
+function toggleSel(id){
+  if(selIds.has(id)) selIds.delete(id); else selIds.add(id);
+  var card = document.getElementById('card-'+id);
+  if(card) card.classList.toggle('selected', selIds.has(id));
+  updateSelUI();
+}
+
+function updateSelUI(){
+  var cnt = selIds.size;
+  document.getElementById('sel-count').textContent = cnt ? cnt+' seleccionado'+(cnt>1?'s':'') : '';
+  document.getElementById('btn-grad').style.display = cnt>0 ? 'block' : 'none';
+}
+
+function renderGrid(){
+  var grid = document.getElementById('grid');
+  document.getElementById('empty').style.display = trophies.length ? 'none' : 'block';
+  grid.innerHTML = '';
+  trophies.forEach(function(t){
+    var isSel = selIds.has(t.id);
+    var d = document.createElement('div');
+    d.className = 'trophy-card'+(isSel?' selected':'');
+    d.id = 'card-'+t.id;
+    d.innerHTML =
+      '<div class="sel-badge">Seleccionado</div>'+
+      '<canvas class="tc-canvas" id="mc-'+t.id+'" width="190" height="130"></canvas>'+
+      '<div class="tc-info">'+
+        '<div class="tc-name">'+escHtml(t.name)+'</div>'+
+        '<div class="tc-sub">'+escHtml(t.group)+' · '+escHtml(t.achievement)+'</div>'+
+        '<div class="tc-actions">'+
+          '<button class="tc-btn" onclick="openView(\''+t.id+'\')">Ver</button>'+
+          '<button class="tc-btn" onclick="toggleSel(\''+t.id+'\')" style="'+(isSel?'color:#00ba12;border-color:#1a3a1a':'')+'">'+
+            (isSel?'Quitar':'+ Grad.')+'</button>'+
+          '<button class="tc-btn" onclick="showShareFor(\''+t.id+'\')">Link</button>'+
+          '<button class="tc-btn" onclick="deleteTrophy(\''+t.id+'\')" style="color:#ff4240;border-color:#2a0f0f">×</button>'+
+        '</div>'+
+      '</div>';
+    grid.appendChild(d);
+  });
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function openView(id){
+  currentTrophy = trophies.find(function(t){ return t.id===id; });
+  if(!currentTrophy) return;
+  document.getElementById('tv-name').textContent = currentTrophy.name;
+  document.getElementById('tv-course').textContent = currentTrophy.group+' · Roblox Studio';
+  document.getElementById('tv-badge').textContent = '🏆 '+currentTrophy.achievement;
+  document.getElementById('admin-view').style.display = 'none';
+  document.getElementById('trophy-view').style.display = 'flex';
+  spawnConfetti('tv-confetti', 45);
+  if(tvRenderer){ cancelAnimationFrame(tvAnimId); tvRenderer.dispose(); tvRenderer=null; }
+  var canvas = document.getElementById('tv-canvas');
+  canvas.width=340; canvas.height=340;
+  tvRenderer = new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});
+  tvRenderer.setSize(340,340); tvRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); tvRenderer.setClearColor(0,0);
+  var sc = new THREE.Scene();
+  var cam = new THREE.PerspectiveCamera(38,1,.1,50);
+  cam.position.set(0,.4,4.2); cam.lookAt(0,.2,0);
+  var grp = buildTrophy(sc, currentTrophy.color, 1);
+  var tick = function(){
+    tvAnimId = requestAnimationFrame(tick);
+    grp.rotation.y += .012;
+    grp.position.y = Math.sin(Date.now()*.001)*.06;
+    tvRenderer.render(sc,cam);
+  };
+  tick();
+}
+
+function closeView(){
+  if(tvAnimId) cancelAnimationFrame(tvAnimId);
+  if(tvRenderer){ tvRenderer.dispose(); tvRenderer=null; }
+  document.getElementById('trophy-view').style.display = 'none';
+  document.getElementById('admin-view').style.display = 'block';
+  document.getElementById('tv-confetti').innerHTML = '';
+}
+
+function openGrad(){
+  if(!selIds.size){ showToast('Selecciona al menos un trofeo'); return; }
+  var selected = trophies.filter(function(t){ return selIds.has(t.id); });
+  document.getElementById('admin-view').style.display = 'none';
+  document.getElementById('grad-view').style.display = 'block';
+
+  gradRenderers.forEach(function(r){ r.dispose(); }); gradRenderers=[];
+  gradAnimIds.forEach(function(id){ cancelAnimationFrame(id); }); gradAnimIds=[];
+
+  var n = selected.length;
+  var cols = n<=2 ? n : n<=4 ? 2 : n<=6 ? 3 : 4;
+  var rows = Math.ceil(n/cols);
+  var gapH = 14, gapV = 14, padT = 56, padB = 20, padH = 20;
+  var availW = window.innerWidth - padH*2 - (cols-1)*gapH;
+  var availH = window.innerHeight - padT - padB - (rows-1)*gapV;
+  var itemW = Math.min(200, Math.floor(availW/cols));
+  var itemH = Math.min(175, Math.floor(availH/rows));
+  var canW = itemW, canH = Math.round(itemH*.76);
+
+  var gg = document.getElementById('grad-grid');
+  gg.style.gridTemplateColumns = 'repeat('+cols+','+itemW+'px)';
+  gg.innerHTML = '';
+
+  selected.forEach(function(t,i){
+    var div = document.createElement('div');
+    div.className = 'grad-item';
+    div.style.animationDelay = (i*.09)+'s';
+
+    var cv = document.createElement('canvas');
+    cv.width=canW; cv.height=canH;
+    cv.style.cssText = 'width:'+canW+'px;height:'+canH+'px;border-radius:8px';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'grad-name';
+    nameEl.textContent = t.name;
+
+    var achEl = document.createElement('div');
+    achEl.className = 'grad-ach';
+    achEl.textContent = t.achievement;
+
+    div.appendChild(cv);
+    div.appendChild(nameEl);
+    div.appendChild(achEl);
+    gg.appendChild(div);
+
+    var r = new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+    r.setSize(canW,canH); r.setPixelRatio(Math.min(window.devicePixelRatio,2)); r.setClearColor(0,0);
+    gradRenderers.push(r);
+    var sc = new THREE.Scene();
+    var asp = canW/canH;
+    var cam = new THREE.PerspectiveCamera(42,asp,.1,50);
+    cam.position.set(0,.3,3.4); cam.lookAt(0,.15,0);
+    var s = Math.min(.54,.54*(canW/185));
+    var grp = buildTrophy(sc, t.color, s);
+    var idx = i;
+    var tick = function(){
+      var aid = requestAnimationFrame(tick);
+      grp.rotation.y += .015;
+      grp.position.y = Math.sin(Date.now()*.001+idx)*.04;
+      r.render(sc,cam);
+      gradAnimIds.push(aid);
+    };
+    tick();
+  });
+
+  spawnConfetti('gv-confetti', 65);
+}
+
+function closeGrad(){
+  gradRenderers.forEach(function(r){ r.dispose(); }); gradRenderers=[];
+  gradAnimIds.forEach(function(id){ cancelAnimationFrame(id); }); gradAnimIds=[];
+  document.getElementById('grad-view').style.display = 'none';
+  document.getElementById('admin-view').style.display = 'block';
+  document.getElementById('gv-confetti').innerHTML = '';
+}
+
+function spawnConfetti(containerId, count){
+  var c = document.getElementById(containerId);
+  c.innerHTML = '';
+  if(!document.getElementById('conf-kf')){
+    var st = document.createElement('style');
+    st.id = 'conf-kf';
+    st.textContent = '@keyframes confFly{0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.8)}8%{opacity:.95}88%{opacity:.7}100%{opacity:0;transform:translateY(-105vh) rotate(540deg) scale(1.1)}}';
+    document.head.appendChild(st);
+  }
+  for(var i=0;i<count;i++){
+    var p = document.createElement('div');
+    var size = 4+Math.random()*7;
+    var col = PC_COLORS[Math.floor(Math.random()*PC_COLORS.length)];
+    var dur = 2.8+Math.random()*3.5;
+    var delay = Math.random()*3;
+    var left = Math.random()*100;
+    var isRect = Math.random()>.5;
+    p.style.cssText = 'position:absolute;width:'+size+'px;height:'+(isRect?size*.4:size)+'px;background:'+col+';left:'+left+'%;bottom:-20px;border-radius:'+(isRect?1:50)+'%;opacity:0;animation:confFly '+dur+'s '+delay+'s linear infinite';
+    c.appendChild(p);
+  }
+}
+
+function showShareFor(id){
+  currentTrophy = trophies.find(function(t){ return t.id===id; });
+  showShare();
+}
+
+function showShare(){
+  if(!currentTrophy) return;
+  var p = new URLSearchParams({id:currentTrophy.id,n:currentTrophy.name,g:currentTrophy.group,a:currentTrophy.achievement,c:currentTrophy.color});
+  var link = location.origin + location.pathname + '?' + p.toString();
+  document.getElementById('share-link').textContent = link;
+  document.getElementById('share-modal').style.display = 'flex';
+}
+
+function copyLink(){
+  var txt = document.getElementById('share-link').textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    closeModal(); showToast('¡Link copiado al portapapeles!');
+  }).catch(function(){
+    showToast('Selecciona el link y cópialo manualmente');
+  });
+}
+
+function closeModal(){ document.getElementById('share-modal').style.display='none'; }
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 2600);
+}
+
+function checkUrl(){
+  var p = new URLSearchParams(location.search);
+  if(p.get('id') && p.get('n')){
+    var t = {id:p.get('id'),name:p.get('n'),group:p.get('g')||'Roblox Studio',achievement:p.get('a')||'Graduación',color:p.get('c')||'gold'};
+    if(!trophies.find(function(x){ return x.id===t.id; })){ trophies.push(t); saveData(); }
+    setTimeout(function(){ openView(t.id); }, 350);
+  }
+}
+
+loadData();
+renderGrid();
+checkUrl();
+setTimeout(function(){ trophies.forEach(function(t){ initMini(t.id); }); }, 200);
+</script>
+</body>
+</html>
