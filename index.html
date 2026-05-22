@@ -366,10 +366,6 @@ function openView(id){
   document.getElementById('tv-badge').textContent = '🏆 '+currentTrophy.achievement;
   document.getElementById('admin-view').style.display = 'none';
   document.getElementById('trophy-view').style.display = 'flex';
-  if(new URLSearchParams(location.search).get('id')){
-    document.getElementById('tv-back').style.display = 'none';
-    document.getElementById('tv-share').style.display = 'none';
-  }
   spawnConfetti('tv-confetti', 45);
   if(tvRenderer){ cancelAnimationFrame(tvAnimId); tvRenderer.dispose(); tvRenderer=null; }
   var canvas = document.getElementById('tv-canvas');
