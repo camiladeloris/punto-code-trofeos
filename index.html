@@ -218,8 +218,23 @@ let trophies = [], miniScenes = {}, selIds = new Set();
 let tvRenderer = null, tvAnimId = null, currentTrophy = null, tvLights = {};
 let gradRenderers = [], gradAnimIds = [];
 
-function loadData(){ try{ const d=localStorage.getItem('pc_trophies_v2'); if(d) trophies=JSON.parse(d); }catch(e){} }
-function saveData(){ try{ localStorage.setItem('pc_trophies_v2',JSON.stringify(trophies)); }catch(e){} }
+const API = 'https://script.google.com/macros/s/AKfycbxlQjwNR5VfTwZP-uphqZ4r2EbaeuSfFW6YQQ86MtMsSkwDT0ilXVpiOxeXPhOfGFSO/exec';
+
+function loadData(){
+  fetch(API).then(r=>r.json()).then(function(data){
+    trophies = data;
+    renderGrid();
+    setTimeout(function(){ trophies.forEach(function(t){ initMini(t.id); }); }, 200);
+    checkUrl();
+  }).catch(function(){ console.log('Error cargando trofeos'); });
+}
+
+function saveData(){
+  fetch(API, {
+    method:'POST',
+    body: JSON.stringify({action:'save', trophies:trophies})
+  }).catch(function(){ console.log('Error guardando'); });
+}
 function genId(){ return 't'+Date.now()+Math.random().toString(36).slice(2,6); }
 
 function mat(hex,r,m){
@@ -555,8 +570,7 @@ function checkUrl(){
 }
 loadData();
 renderGrid();
-setTimeout(function(){ checkUrl(); }, 100);
-setTimeout(function(){ trophies.forEach(function(t){ initMini(t.id); }); }, 200);
+
 </script>
 </body>
 </html>
