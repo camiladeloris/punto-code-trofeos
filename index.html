@@ -366,10 +366,6 @@ function openView(id){
   document.getElementById('tv-badge').textContent = '🏆 '+currentTrophy.achievement;
   document.getElementById('admin-view').style.display = 'none';
   document.getElementById('trophy-view').style.display = 'flex';
-  if(new URLSearchParams(location.search).get('id')){
-  document.getElementById('tv-back').style.display = 'none';
-  document.getElementById('tv-share').style.display = 'none';
-  }
   spawnConfetti('tv-confetti', 45);
   if(tvRenderer){ cancelAnimationFrame(tvAnimId); tvRenderer.dispose(); tvRenderer=null; }
   var canvas = document.getElementById('tv-canvas');
@@ -548,12 +544,12 @@ function showToast(msg){
 function checkUrl(){
   var p = new URLSearchParams(location.search);
   if(p.get('id') && p.get('n')){
+    document.getElementById('tv-back').style.display = 'none';
+    document.getElementById('tv-share').style.display = 'none';
     var t = {id:p.get('id'),name:p.get('n'),group:p.get('g')||'Roblox Studio',achievement:p.get('a')||'Graduación',color:p.get('c')||'gold'};
     if(!trophies.find(function(x){ return x.id===t.id; })){ trophies.push(t); saveData(); }
     setTimeout(function(){ openView(t.id); }, 350);
-    document.getElementById('tv-back').style.display = 'none';
-  document.getElementById('tv-share').style.display = 'none';
-  }
+    }
 }
 
 loadData();
